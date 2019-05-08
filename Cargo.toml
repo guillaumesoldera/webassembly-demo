@@ -1,0 +1,12 @@
+[package]
+name = "lib" # the name of the package
+version = "0.1.0"    # the current version, obeying semver
+authors = ["Guillaume <guillaume.soldera@gmail.com>"]
+
+[lib]
+path = "lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+rand = { version = "0.6.5", features = ["wasm-bindgen"]}
+wasm-bindgen = "0.2.43"
