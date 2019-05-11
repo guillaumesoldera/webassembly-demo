@@ -1,8 +1,29 @@
 <html>
     <head>
+        <script>
+            function mult(a, b) {
+                var wasmImports = {
+                    env: { logMethod: arg => console.log('Parameter '+arg) }
+                };
+                fetch('program.wasm').then(response => 
+                    response.arrayBuffer()
+                ).then(bytes => 
+                    WebAssembly.instantiate(bytes, wasmImports)
+                ).then(obj => {
+                    return obj.instance.exports.mult(a, b)
+                })
+                .then(res => 
+                    document.getElementById('out').innerHTML = res
+                );
+            }
+        </script>
     </head>
     <body>
-            <script type="text/javascript" src="./index.js"></script>
+            <input type="number" id="first" />
+            <input type="number" id="second" />
+            <button onclick="mult(document.getElementById('first').value, document.getElementById('second').value)" >Mult</button>
+            <div id="out"></div>
+            <!--<script type="text/javascript" src="./index.js"></script>-->
         
     </body>
 </html>

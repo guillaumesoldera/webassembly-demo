@@ -62,7 +62,7 @@ pub fn max_from_array(nbValues: usize) -> f32 {
 #[wasm_bindgen]
 pub fn maxValues(values: &[i32]) -> i32 {
     let mut max: i32 = 0;
-    console_log!("Hello {}!", values.len());
+    console_log!("Values size {}!", values.len());
     for current in values {
         if current > &max {
             max = *current;
