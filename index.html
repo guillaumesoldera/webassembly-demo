@@ -1,7 +1,8 @@
 <html>
     <head>
+        <script src="program.js"></script>
         <script>
-            function mult(a, b) {
+            function multWasm(a, b) {
                 var wasmImports = {
                     env: { logMethod: arg => console.log('Parameter '+arg) }
                 };
@@ -21,7 +22,8 @@
     <body>
             <input type="number" id="first" />
             <input type="number" id="second" />
-            <button onclick="mult(document.getElementById('first').value, document.getElementById('second').value)" >Mult</button>
+            <button onclick="mult(document.getElementById('first').value, document.getElementById('second').value, console.log)" >Mult</button>
+            <button onclick="multWasm(document.getElementById('first').value, document.getElementById('second').value)" >Mult wasm</button>
             <div id="out"></div>
             <!--<script type="text/javascript" src="./index.js"></script>-->
         
