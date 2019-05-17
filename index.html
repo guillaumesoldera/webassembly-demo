@@ -2,29 +2,129 @@
     <head>
         <script src="program.js"></script>
         <script>
+            const Module = {};
+            var wasmImports = {
+                env: { logMethod: arg => console.log('Parameter '+arg), jsPrintString: consoleLogString }
+            };
+            function consoleLogString(offset, length) {
+                var bytes = new Uint8Array(Module.memory.buffer, offset, length);
+                var string = new TextDecoder('utf8').decode(bytes);
+                console.log(string);
+            }
+
             function multWasm(a, b) {
-                var wasmImports = {
-                    env: { logMethod: arg => console.log('Parameter '+arg) }
-                };
-                fetch('program.wasm').then(response => 
+                fetch('test.wasm').then(response => 
                     response.arrayBuffer()
                 ).then(bytes => 
                     WebAssembly.instantiate(bytes, wasmImports)
                 ).then(obj => {
-                    return obj.instance.exports.mult(a, b)
+                    Module.memory = obj.instance.exports.memory;
+                    return obj.instance.exports.mult(a, b);
                 })
                 .then(res => 
                     document.getElementById('out').innerHTML = res
                 );
+            }
+
+            function fibonacci(num) {
+                if (num <= 1) return 1;
+
+                return fibonacci(num - 1) + fibonacci(num - 2);
+            }
+            function fibonacciWasm(num) {
+                console.log('call wasm')
+                fetch('fibonacci.wasm').then(response => 
+                    response.arrayBuffer()
+                ).then(bytes => {
+                    console.log('call wasm instantiate')
+                    return WebAssembly.instantiate(bytes, wasmImports)
+                }
+                ).then(obj => {
+                    console.log('call wasm method')
+                    var start = window.performance.now();
+                    var fibo = obj.instance.exports.fibonacci(num);
+                    var end = window.performance.now();
+                    console.log('WASM time :', (end - start))
+                    return fibo;
+                }).then(value => console.log('WASM : ', value))
+            }
+
+            function fibonacciCall() {
+                const num = parseInt(document.getElementById('fibonacci-num').value)
+                console.log('num', num)
+                new Promise((resolve, reject) => {
+                    fibonacciWasm(num)
+                })
+                new Promise((resolve, reject) => {
+                    resolve(true)
+                })
+                .then(() => {
+                    console.log('call JS')
+                    var start = window.performance.now();
+                    const fibo = fibonacci(num);
+                    var end = window.performance.now();
+                    console.log('JS time :', (end - start))
+                    return fibo;
+                })
+                .then(value => console.log('JS : ', value))
+            }
+
+            function getMax() {
+                fetch('test.wasm').then(response => 
+                    response.arrayBuffer()
+                ).then(bytes => 
+                    WebAssembly.instantiate(bytes, wasmImports)
+                ).then(obj => {
+                    console.log(obj.instance.exports);
+                    Module.memory = obj.instance.exports.memory;
+                    const nbValues = 100000;
+                    let ptr = 0;
+                    console.log('create values');
+                    let buffer = new Float32Array(Module.memory.buffer);
+                    for (let i=0; i<nbValues; i++) {
+                        const value = Math.random();
+                        buffer[ptr+i] = value;
+                    }
+                    console.log('end values');
+                    //Promise.resolve(() => {
+                        console.log('call max values from wasm')
+                        var start = window.performance.now();
+                        const max = obj.instance.exports.maxValues(buffer, nbValues);
+                        var end = window.performance.now();
+                        document.getElementById('out').innerHTML = max
+                        console.log('end call max values in wasm : ', (end - start))
+                    //})
+                    //Promise.resolve(() => {
+                        console.log('call max in js')
+                        var startJs = window.performance.now();
+                        let maxJs = -1.0;
+                        for (let i=0; i< nbValues; i++) {
+                            const current = buffer[i];
+                            if (current > maxJs) {
+                                maxJs = current;
+                            }
+                        }
+                        var endJs = window.performance.now();
+                        document.getElementById('out-js').innerHTML = maxJs
+                        console.log('end call max values in js', (endJs - startJs))
+                    //})
+                })
+                //.then(res => 
+                //    document.getElementById('out').innerHTML = res
+                //);
             }
         </script>
     </head>
     <body>
             <input type="number" id="first" />
             <input type="number" id="second" />
+            <input type="number" id="fibonacci-num" />
             <button onclick="mult(document.getElementById('first').value, document.getElementById('second').value, console.log)" >Mult</button>
             <button onclick="multWasm(document.getElementById('first').value, document.getElementById('second').value)" >Mult wasm</button>
+            <button onclick="getMax()">Get Max</button>
+            <button onclick="fibonacciCall()">Fibonacci</button>
             <div id="out"></div>
+            <div id="out-js"></div>
             <!--<script type="text/javascript" src="./index.js"></script>-->
         
     </body>

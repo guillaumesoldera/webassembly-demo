@@ -1,4 +1,5 @@
-import { max_from_array, maxValues } from './lib.rs';
+//import { max_from_array, maxValues, alloc, getMax } from './lib.rs';
+import Blabla from './lib.rs';
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
@@ -26,7 +27,7 @@ function maxValuesInArray(nbValues) {
 }
 
 function maxValuesFromWasm(nbValues) {
-    return max_from_array(nbValues);
+    return Blabla.max_from_array(nbValues);
 }
 
 function maxInArray(array) {
@@ -48,6 +49,23 @@ function maxInArray(array) {
     return max;
 }
 
+function getMaxInArray(nbValues) {
+    console.log(Blabla);
+    const memory = new WebAssembly.Memory({initial: 1});
+    let ptr = Blabla.alloc(nbValues)
+    console.log('ptr', ptr);
+    let buffer = new Float32Array(memory.buffer);
+    for (let i=0; i<nbValues; i++) {
+        const value = Math.random();
+        console.log('value', value);
+        buffer[ptr+i] = value;
+    }
+    console.log('buffer', buffer)
+    const max = Blabla.getMax(ptr, nbValues)
+    console.log('max = ', max);
+
+}
+
 module.exports = {
-    computeMax: maxValuesInArray
+    computeMax: getMaxInArray
 }

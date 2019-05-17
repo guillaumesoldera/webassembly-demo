@@ -2,7 +2,7 @@ import Compute from './computeMax'
 
 function calculateMax() {
     const start = new Date();
-    const size = 100000000; //document.getElementById('size').value;
+    const size = 10; //document.getElementById('size').value;
     const max = Compute.computeMax(size)
     const end = new Date();
     const maxLabel = document.createElement('label');
