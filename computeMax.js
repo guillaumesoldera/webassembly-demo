@@ -67,5 +67,5 @@ function getMaxInArray(nbValues) {
 }
 
 module.exports = {
-    computeMax: getMaxInArray
+    computeMax: maxValuesFromWasm
 }

@@ -1,0 +1,35 @@
+<html>
+    <head>
+        <script src="./max-array.js"></script>
+    </head>
+    <body>
+        <div>
+            <label>Array size</label>
+            <input type="number" min="5" id="arraysize">
+        </div>
+        <div>
+            <label>Max from array : </label>
+            <label id="result"></label>
+        </div>
+        <button onclick="getMax()">Get MAX</button>
+        <script>
+            function getRandomInt(max) {
+                return Math.floor(Math.random() * Math.floor(max));
+            }
+
+            function getMax() {
+                var arraySize = parseInt(document.getElementById('arraysize').value)
+                var i32 = new Uint32Array(arraySize);
+                for (var i = 0; i < arraySize; i++) {
+                    i32[i] = getRandomInt(30);
+                }
+                var start = window.performance.now();
+                var max = maxInArray(i32);
+                var end = window.performance.now();
+                console.log("Computed done", end - start);
+                // 100000000 -> 2s
+                console.log('max', max)
+            }
+        </script>
+    </body>
+</html>

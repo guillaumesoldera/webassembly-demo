@@ -77,7 +77,8 @@
                 ).then(obj => {
                     console.log(obj.instance.exports);
                     Module.memory = obj.instance.exports.memory;
-                    const nbValues = 100000;
+                    //const nbValues = 1000000;
+                    const nbValues = parseInt(document.getElementById('array-size').value);
                     let ptr = 0;
                     console.log('create values');
                     let buffer = new Float32Array(Module.memory.buffer);
@@ -118,11 +119,15 @@
     <body>
             <input type="number" id="first" />
             <input type="number" id="second" />
-            <input type="number" id="fibonacci-num" />
             <button onclick="mult(document.getElementById('first').value, document.getElementById('second').value, console.log)" >Mult</button>
             <button onclick="multWasm(document.getElementById('first').value, document.getElementById('second').value)" >Mult wasm</button>
+            <br>
+            <input type="number" placeholder="Array size" id="array-size" value="1000000" />
             <button onclick="getMax()">Get Max</button>
+            <br>
+            <input type="number" placeholder="fibonacci" id="fibonacci-num" value="40" />
             <button onclick="fibonacciCall()">Fibonacci</button>
+            <br>
             <div id="out"></div>
             <div id="out-js"></div>
             <!--<script type="text/javascript" src="./index.js"></script>-->

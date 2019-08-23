@@ -1,0 +1,34 @@
+<html>
+    <head>
+        <script src="./fibonacci.js"></script>
+        <style>
+            .hide {
+                opacity: 0;;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Nombres de Fibonacci</h1>
+        <div class="fibo-input container">
+            <label>Terme</label>
+            <input id="fiboInput" type="number" min="0" onchange="updateSub(this)">
+        </div>
+        <div class="fibo-result container hide" id="result-container">
+            <label>F<sub id="index"></sub></label>
+            <label><span> = </span><span id="result"></span></label>
+        </div>
+        <button onclick="computeFibo()">Compute</button>
+        <script>
+            function updateSub(element) {
+                document.getElementById('result-container').classList.add('hide');
+                document.getElementById('index').innerHTML = element.value
+            }
+            function computeFibo() {
+                document.getElementById('result-container').classList.remove('hide');
+                var value = parseInt(document.getElementById('fiboInput').value);
+                var result = fibo(value);
+                document.getElementById('result').innerText = result
+            }
+        </script>
+    </body>
+</html>
