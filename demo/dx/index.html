@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <title>WebAssembly - Multiplication</title>
+        <script src="./index.js"></script>
+    </head>
+    <body>
+        <div>
+            <input type="number" id="lhs"> x <input type="number" id="rhs">
+        </div>
+        <div>
+            <label>Résultat : </label>
+            <label id="result"></label>
+        </div>
+        <button onclick="mult()">Mult.</button>
+        <script>
+        function mult() {
+                const lhs = parseInt(document.getElementById('lhs').value)
+                const rhs = parseInt(document.getElementById('rhs').value)
+                
+                const result = obj.instance.exports.mult(lhs, rhs);
+                document.getElementById('result').innerHTML = result;
+            }
+        </script>
+    </body>
+</html>

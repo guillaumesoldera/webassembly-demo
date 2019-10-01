@@ -1,0 +1,58 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>WASM memory test</title>
+  </head>
+
+  <body>
+    <script>
+
+     function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+    function getMaxInJS(array) {
+        var max = -1;
+        for (let i=0; i< array.length; i++) {
+            if (array[i] > max) {
+                max = array[i]
+            }
+        }
+        return max;
+    }
+
+      var memory = new WebAssembly.Memory({initial:10000});
+      console.log("fetch WASM and instantiate module...");
+      fetch('maxInArray.wasm').then(response => 
+            response.arrayBuffer()
+        ).then(bytes => 
+            WebAssembly.instantiate(bytes, { js: { mem: memory } }))
+      .then(obj => {
+        console.log("WASM module instantiated");
+        var nbValues = 10000000;
+        console.log("Fill array with random " + nbValues + " values");
+        let buffer = new Int32Array(memory.buffer);
+        for (let i=0; i<nbValues; i++) {
+            const value = getRandomInt(10000000);
+
+            buffer[i] = value;
+        }
+        console.log("Array filled");
+        var startWASM = window.performance.now();
+        console.log("Call both functions");
+        var sum = obj.instance.exports.maxValues(0, nbValues);
+        var endWASM = window.performance.now();
+        var startJS = window.performance.now();
+        var max = getMaxInJS(buffer);
+        var endJS = window.performance.now();
+        console.log(sum);
+        console.log(max);
+        console.log("Computed in wasm in", endWASM - startWASM);
+        console.log("Computed in js in", endJS - startJS);
+      });
+    </script>
+  </body>
+
+</html>
