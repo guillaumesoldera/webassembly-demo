@@ -5,10 +5,96 @@
   <head>
     <meta charset="utf-8">
     <title>WASM memory test</title>
+    <link rel="stylesheet" href="../styles/main.css"></link>
+    <link rel="stylesheet" href="../prism/prism.css"></link>
+        <script src="../prism/prism.js"></script>
   </head>
 
   <body>
+  <header>
+        <h1>WebAssembly Démo - WASM vs JS</h1>
+        </header>
+        <main>
+        <div class="content">
+            <div>
+              <input type="range" min="1" max="100000000" value="1" class="slider" id="length"><br>
+              <label>Nombre de valeurs dans le tableau : </label><span id="range-value"></span>
+            </div>
+            <div id="output" class="output">
+            </div>
+        </div>
+        <button onclick="fill()">Remplir le tableau</button>
+        <button id="run" disabled onclick="run()">Run</button>
+        <div class="code">
+            <button onclick="showHideCode()">Code</button>
+            <div id="code" class="hide codes">
+                <pre><code class="language-js">
+// Javascript
+var memory = new WebAssembly.Memory({initial:10000});
+var nbValues = ...;
+let buffer = new Int32Array(memory.buffer);
+for (let i=0; i<nbValues; i++) {
+  buffer[i] = getRandomInt(10000000);
+}
+fetch('maxInArray.wasm').then(response => 
+  response.arrayBuffer()
+).then(bytes => 
+  WebAssembly.instantiate(bytes, { js: { mem: memory } }))
+.then(obj => {
+  obj.instance.exports.maxValues(0, nbValues)
+})
+                </code></pre>
+                <pre><code class="language-c">
+// C
+int maxValues(int *buf, int bufferSize) {
+  int max = -1.0;
+  for (int i=0; i<bufferSize; i++) {
+    int current = buf[i];
+    if (current > max) {
+      max = current;
+    }
+  }
+  return max;
+}
+                </code></pre>
+                </div>
+                <div id="code" class="hide codes">
+                <pre><code class="language-wasm">
+// WAT
+(module
+ (table 0 anyfunc)
+ (memory (import "js" "mem") 1)
+ (export "maxValues" (func $maxValues))
+ (func $maxValues (; 0 ;) (param $0 i32) (param $1 i32) (result i32)
+  ...
+ )
+)
+                </code></pre>
+        </div>
+        </main>
     <script>
+    function showHideCode() {
+            
+            Array.from(document.getElementsByClassName('codes')).forEach((el) => {
+               el.classList.toggle('hide');
+            });
+            
+        }
+    var slider = document.getElementById("length");
+    var rangeValue = document.getElementById("range-value");
+    rangeValue.innerHTML = slider.value;
+
+    slider.oninput = function() {
+      rangeValue.innerHTML = this.value;
+    }
+    
+    function log(elem) {
+            var line = document.createElement("span");
+            line.classList.add("log");
+            line.innerText = elem;
+            document.getElementById('output').appendChild(line);
+            console.log(elem);
+        }
 
      function getRandomInt(max) {
         return Math.floor(Math.random() * Math.floor(max));
@@ -23,35 +109,44 @@
         return max;
     }
 
-      var memory = new WebAssembly.Memory({initial:10000});
-      console.log("fetch WASM and instantiate module...");
+    var memory = new WebAssembly.Memory({initial:10000});
+    var nbValues = 1000;
+    let buffer = new Int32Array(memory.buffer);
+    //let bufferJS = [];
+    function fill() {
+      nbValues = parseInt(slider.value);
+      log("Fill array with random " + nbValues + " values");
+      for (let i=0; i<nbValues; i++) {
+          const value = getRandomInt(10000000);
+
+          buffer[i] = value;
+          //bufferJS.push(value);
+      }
+      log("Array filled");
+      document.getElementById('run').disabled = false;
+    }
+    function run() {
+      log("fetch WASM and instantiate module...");
       fetch('maxInArray.wasm').then(response => 
             response.arrayBuffer()
         ).then(bytes => 
             WebAssembly.instantiate(bytes, { js: { mem: memory } }))
       .then(obj => {
-        console.log("WASM module instantiated");
-        var nbValues = 10000000;
-        console.log("Fill array with random " + nbValues + " values");
-        let buffer = new Int32Array(memory.buffer);
-        for (let i=0; i<nbValues; i++) {
-            const value = getRandomInt(10000000);
-
-            buffer[i] = value;
-        }
-        console.log("Array filled");
-        var startWASM = window.performance.now();
-        console.log("Call both functions");
-        var sum = obj.instance.exports.maxValues(0, nbValues);
-        var endWASM = window.performance.now();
+        log("WASM module instantiated");
+        log("Call both functions");
         var startJS = window.performance.now();
+        //var max = getMaxInJS(bufferJS);
         var max = getMaxInJS(buffer);
         var endJS = window.performance.now();
-        console.log(sum);
-        console.log(max);
-        console.log("Computed in wasm in", endWASM - startWASM);
-        console.log("Computed in js in", endJS - startJS);
+        var startWASM = window.performance.now();
+        var sum = obj.instance.exports.maxValues(0, nbValues);
+        var endWASM = window.performance.now();
+        log("Max computed in WASM " + sum);
+        log("Max computed in JS " + max);
+        log("Computed in wasm in : " + (endWASM - startWASM));
+        log("Computed in js in : " + (endJS - startJS));
       });
+    }
     </script>
   </body>
 

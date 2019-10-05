@@ -1,18 +1,52 @@
 <html>
     <head>
         <title>WebAssembly - Multiplication</title>
+        <link rel="stylesheet" href="../styles/main.css"></link>
+        <link rel="stylesheet" href="../prism/prism.css"></link>
+        <script src="../prism/prism.js"></script>
+        <script src="./mult.js"></script>
     </head>
     <body>
+        <header>
+        <h1>WebAssembly Démo - Simple Multiplication</h1>
+        </header>
+        <main>
         <div>
-            <input type="number" id="lhs"> x <input type="number" id="rhs">
+            <input type="number" id="lhs"> x <input type="number" id="rhs"> = <label id="result"></label>
         </div>
-        <div>
-            <label>Résultat : </label>
-            <label id="result"></label>
+        <button onclick="multiplication()">Calculer</button>
+        <div class="code">
+            <button onclick="showHideCode()">Code</button>
+            <div id="code" class="hide">
+                <pre><code class="language-js">
+    // Javascript
+    const lhs = parseInt(document.getElementById('lhs').value)
+    const rhs = parseInt(document.getElementById('rhs').value)
+    fetch('mult.wasm').then(response => 
+        response.arrayBuffer()
+    ).then(bytes => 
+        WebAssembly.instantiate(bytes, {})
+    ).then(obj => {
+        return obj.instance.exports.mult(lhs, rhs);
+    })
+    .then(res => 
+        document.getElementById('result').innerHTML = res
+    );
+                </code></pre>
+                <pre><code class="language-c">
+    // C
+    int mult(int a, int b) {
+        return a * b;
+    }
+                </code></pre>
+            </div>
         </div>
-        <button onclick="mult()">Mult.</button>
+        </main>
         <script>
-        function mult() {
+        function showHideCode() {
+            document.getElementById('code').classList.toggle('hide');
+        }
+        function multiplication() {
                 const lhs = parseInt(document.getElementById('lhs').value)
                 const rhs = parseInt(document.getElementById('rhs').value)
                 fetch('mult.wasm').then(response => 

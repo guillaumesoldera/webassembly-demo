@@ -1,7 +1,7 @@
 <html>
     <head>
         <title>WebAssembly - Multiplication</title>
-        <script src="./index.js"></script>
+        <script src="http://localhost:51707/index.js"></script>
     </head>
     <body>
         <div>
@@ -11,14 +11,15 @@
             <label>Résultat : </label>
             <label id="result"></label>
         </div>
-        <button onclick="mult()">Mult.</button>
+        <button id="multbutton" onclick="multiplication()">Mult.</button>
         <script>
-        function mult() {
+            function multiplication() {
+                Demo.test()
                 const lhs = parseInt(document.getElementById('lhs').value)
                 const rhs = parseInt(document.getElementById('rhs').value)
                 
-                const result = obj.instance.exports.mult(lhs, rhs);
-                document.getElementById('result').innerHTML = result;
+                //const result = mult(lhs, rhs);
+                //document.getElementById('result').innerHTML = result;
             }
         </script>
     </body>

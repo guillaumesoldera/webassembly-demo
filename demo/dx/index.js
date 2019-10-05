@@ -1,5 +1,9 @@
-import Module from './mult.rs';
+import { hello } from './main.js';
 
-function mult(a, b) {
-    return Module.mult(a, b);
+
+export function test() {
+    console.log('test')
+    hello();
 }
+
+//hello();

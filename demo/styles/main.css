@@ -1,0 +1,100 @@
+body {
+    margin: 0;
+    font-family: Helvetica,arial,nimbussansl,liberationsans,freesans,clean,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    color: #555;
+    font-size: 18px;
+}
+header {
+    background-color: #ebecef;
+    background-image: url('../images/Web_Assembly_Logo.svg');
+    background-size: 50px 50px;
+    background-repeat: no-repeat;
+    background-position: 20px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding-left: 100px
+}
+header h1 {
+    font-weight: 400;
+    color: #000;
+}
+main {
+    padding: 20px;
+}
+.item {
+    list-style-type: none;
+    margin: 16px;
+}
+.item a {
+    color: #3d3d3e;
+    text-decoration: none;
+    margin: 10px;
+    position: relative;
+}
+.item a:hover {
+    text-decoration: underline;
+    font-weight: bold;
+}
+.item a::before {
+    content: '';
+    position: absolute;
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+    width: 8px;
+    height: 8px;
+    top: calc(50% - 1px);
+    left: -20px;
+    transform: translateY(-50%) rotate(-45deg);
+}
+main input {
+    padding: 12px 20px;
+    margin: 8px;
+    box-sizing: border-box;
+}
+button {
+    background-color: #555;
+    border: none;
+    color: white;
+    padding: 16px 32px;
+    text-decoration: none;
+    margin: 4px 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+button:disabled {
+    color: graytext;
+    background-color: lightgray;
+}
+.code {
+    margin-top: 70px;
+}
+.hide {
+    display: none !important;
+}
+#code {
+    display: flex;
+    justify-content: space-between;
+}
+#code pre {
+    width: 45%
+}
+
+main .content {
+    display: flex;
+    justify-content: space-between;
+}
+.output {
+    display: flex;
+    flex-direction: column;
+    height: 150px;
+    width: 35%;
+    outline: 1px solid #555;
+    overflow: auto;
+    font-size: 14px;
+    font-style: italic;
+}
+input[type="range"] {
+    padding: 0;
+    width: 300px;
+}

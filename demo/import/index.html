@@ -1,25 +1,93 @@
 <html>
     <head>
-        <title>WebAssembly - Multiplication</title>
+        <title>WebAssembly - Import</title>
+        <link rel="stylesheet" href="../styles/main.css"></link>
+        <link rel="stylesheet" href="../prism/prism.css"></link>
+        <script src="../prism/prism.js"></script>
     </head>
     <body>
-        <div>
-            <input type="number" id="lhs"> x <input type="number" id="rhs">
+    <header>
+        <h1>WebAssembly Démo - Exemple Import</h1>
+        </header>
+        <main>
+        <div class="content">
+            <div>
+                <input type="number" id="lhs"> x <input type="number" id="rhs"> = <label id="result"></label>
+            </div>
+            <div id="output" class="output">
+            </div>
         </div>
-        <div>
-            <label>Résultat : </label>
-            <label id="result"></label>
+        <button onclick="mult()">Calculer</button>
+        <div class="code">
+            <button onclick="showHideCode()">Code</button>
+            <div id="code" class="hide">
+                <pre><code class="language-js">
+    // Javascript            
+    const Module = {};
+    const wasmImports = {
+        env: { 
+            logMethod: arg => console.log('Parameter '+arg),
+            jsPrintString: consoleLogString
+        }
+    };
+    function consoleLogString(offset, length) {
+        const bytes = new Uint8Array(Module.memory.buffer, offset, length);
+        const string = new TextDecoder('utf8').decode(bytes);
+        console.log(string);
+    }
+
+    function mult() {
+        const lhs = parseInt(document.getElementById('lhs').value)
+        const rhs = parseInt(document.getElementById('rhs').value)
+        fetch('mult.wasm').then(response => 
+            response.arrayBuffer()
+        ).then(bytes => 
+            WebAssembly.instantiate(bytes, wasmImports)
+        ).then(obj => {
+            Module.memory = obj.instance.exports.memory;
+            return obj.instance.exports.mult(lhs, rhs);
+        })
+        .then(res => 
+            document.getElementById('result').innerHTML = res
+        );
+    }
+                </code></pre>
+                <pre><code class="language-c">
+    // C
+    extern void jsPrintString(const char *s, int len);
+
+    extern void logMethod(int elem);
+
+    int mult(int a, int b) {
+        char* param1 = "Inside mult method";
+        logMethod(a);
+        logMethod(b);
+        jsPrintString(param1, strlen(param1));
+        return a * b;
+    }
+                </code></pre>
+            </div>
         </div>
-        <button onclick="mult()">Mult.</button>
+        </main>
         <script>
+        function log(elem) {
+            var line = document.createElement("span");
+            line.classList.add("log");
+            line.innerText = elem;
+            document.getElementById('output').appendChild(line);
+            console.log(elem);
+        }
+        function showHideCode() {
+            document.getElementById('code').classList.toggle('hide');
+        }
             const Module = {};
             const wasmImports = {
-                env: { logMethod: arg => console.log('Parameter '+arg), jsPrintString: consoleLogString }
+                env: { logMethod: arg => log('Parameter '+arg), jsPrintString: consoleLogString }
             };
             function consoleLogString(offset, length) {
                 const bytes = new Uint8Array(Module.memory.buffer, offset, length);
                 const string = new TextDecoder('utf8').decode(bytes);
-                console.log(string);
+                log(string);
             }
 
             function mult() {
