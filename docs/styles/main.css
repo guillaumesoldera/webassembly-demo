@@ -98,3 +98,19 @@ input[type="range"] {
     padding: 0;
     width: 300px;
 }
+label.result {
+    width: 150px;
+    text-align: right;
+    display: inline-block;
+    margin-right: 16px;
+}
+.running {
+    font-weight: bold;
+    animation: blinker 1s linear infinite;
+  }
+  
+@keyframes blinker {
+50% {
+    opacity: 0;
+}
+}

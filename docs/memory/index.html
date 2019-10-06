@@ -18,7 +18,9 @@
         <div class="content">
             <div>
               <input type="range" min="1" max="100000000" value="1" class="slider" id="length"><br>
-              <label>Nombre de valeurs dans le tableau : </label><span id="range-value"></span>
+              <label>Nombre de valeurs dans le tableau : </label><span id="range-value"></span><br>
+              <label class="result" id="js-indicator">Result in JS : </label><label id="result-js"></label><br>
+              <label class="result" id="wasm-indicator">Result in WASM : </label><label id="result-wasm"></label>
             </div>
             <div id="output" class="output">
             </div>
@@ -33,7 +35,7 @@
 var memory = new WebAssembly.Memory({initial:10000});
 var nbValues = ...;
 let buffer = new Int32Array(memory.buffer);
-for (let i=0; i<nbValues; i++) {
+for (let i=0; i < nbValues; i++) {
   buffer[i] = getRandomInt(10000000);
 }
 fetch('maxInArray.wasm').then(response => 
@@ -114,38 +116,51 @@ int maxValues(int *buf, int bufferSize) {
     let buffer = new Int32Array(memory.buffer);
     //let bufferJS = [];
     function fill() {
-      nbValues = parseInt(slider.value);
-      log("Fill array with random " + nbValues + " values");
-      for (let i=0; i<nbValues; i++) {
+      document.getElementById('run').disabled = true;
+      document.getElementById('result-wasm').innerHTML = "";
+      document.getElementById('result-js').innerHTML = "";
+      setTimeout(() => {
+
+        nbValues = parseInt(slider.value);
+        log("Fill array with random " + nbValues + " values");
+        for (let i=0; i<nbValues; i++) {
           const value = getRandomInt(10000000);
 
-          buffer[i] = value;
-          //bufferJS.push(value);
-      }
-      log("Array filled");
-      document.getElementById('run').disabled = false;
+            buffer[i] = value;
+            //bufferJS.push(value);
+        }
+        log("Array filled");
+        document.getElementById('run').disabled = false;
+      }, 0)
     }
     function run() {
-      log("fetch WASM and instantiate module...");
-      fetch('maxInArray.wasm').then(response => 
-            response.arrayBuffer()
-        ).then(bytes => 
-            WebAssembly.instantiate(bytes, { js: { mem: memory } }))
-      .then(obj => {
-        log("WASM module instantiated");
-        log("Call both functions");
-        var startJS = window.performance.now();
-        //var max = getMaxInJS(bufferJS);
-        var max = getMaxInJS(buffer);
-        var endJS = window.performance.now();
-        var startWASM = window.performance.now();
-        var sum = obj.instance.exports.maxValues(0, nbValues);
-        var endWASM = window.performance.now();
-        log("Max computed in WASM " + sum);
-        log("Max computed in JS " + max);
-        log("Computed in wasm in : " + (endWASM - startWASM));
-        log("Computed in js in : " + (endJS - startJS));
-      });
+      
+        
+        log("fetch WASM and instantiate module...");
+        fetch('maxInArray.wasm').then(response => 
+              response.arrayBuffer()
+          ).then(bytes => 
+              WebAssembly.instantiate(bytes, { js: { mem: memory } }))
+        .then(obj => {
+          log("WASM module instantiated");
+          log("Call JS function");
+          var startJS = window.performance.now();
+          //var max = getMaxInJS(bufferJS);
+          var max = getMaxInJS(buffer);
+          var endJS = window.performance.now();
+          document.getElementById('result-js').innerHTML = max + "(in " + (endJS - startJS) + "ms)";
+          log("Max computed in JS " + max);
+          log("Computed in js in : " + (endJS - startJS));
+          setTimeout(() => {
+            log("Call WASM function");
+            var startWASM = window.performance.now();
+            var sum = obj.instance.exports.maxValues(0, nbValues);
+            var endWASM = window.performance.now();
+            document.getElementById('result-wasm').innerHTML = sum + "(in " + (endWASM - startWASM) + "ms)";
+            log("Max computed in WASM " + sum);
+            log("Computed in wasm in : " + (endWASM - startWASM));
+            }, 0);
+        });
     }
     </script>
   </body>

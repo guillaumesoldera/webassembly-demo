@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <title>WebAssembly - Fibonacci</title>
+        <link rel="stylesheet" href="../styles/main.css"></link>
+        <link rel="stylesheet" href="../prism/prism.css"></link>
+        <script src="../prism/prism.js"></script>
+    </head>
+    <body>
+        <header>
+        <h1>WebAssembly Démo - Fibonacci</h1>
+        </header>
+        <main>
+        <div class="content">
+            <div>
+                <label>Fibo : </label><input type="number" max="45" id="value"><br>
+                <label class="result" id="js-indicator">Result in JS : </label><label id="result-js"></label><br>
+                <label class="result" id="wasm-indicator">Result in WASM : </label><label id="result-wasm"></label>
+            </div>
+        </div>
+        <button onclick="fibo()">Calculer</button>
+        
+        </main>
+        <script>
+        function log(elem) {
+            console.log(elem);
+        }
+        function jsFib(n) {
+            if (n === 1) return 1;
+            if (n === 2) return 1;
+            return jsFib(n-1) + jsFib(n-2);
+        }
+        
+        function fibo() {
+                document.getElementById('result-wasm').innerHTML = "";
+                document.getElementById('result-js').innerHTML = "";
+                const value = parseInt(document.getElementById('value').value)
+                
+                fetch('fibo.wasm').then(response => 
+                    response.arrayBuffer()
+                ).then(bytes => 
+                    WebAssembly.instantiate(bytes, {})
+                ).then(obj => {
+                    log("start Fibo Wasm");
+                    document.getElementById('wasm-indicator').classList.toggle('running');
+                    document.getElementById('result-wasm').innerHTML = "...";
+                    document.getElementById('result-wasm').classList.toggle('running');
+                    setTimeout(() => {
+
+                        const startWasm = window.performance.now();
+                        const resWasm = obj.instance.exports.fibo(value)            
+                        const endWasm = window.performance.now();
+                        log("end Fibo Wasm");
+                        const result = (resWasm + " (in " + (endWasm-startWasm) + "ms)");
+                        document.getElementById('result-wasm').innerHTML = result;
+                        document.getElementById('result-wasm').classList.toggle('running');
+                        document.getElementById('wasm-indicator').classList.toggle('running');
+                        document.getElementById('js-indicator').classList.toggle('running');
+                        document.getElementById('result-js').innerHTML = "...";
+                        document.getElementById('result-js').classList.toggle('running');
+                        setTimeout(() => {
+
+                            log("start Fibo JS");
+                            const startJs = window.performance.now();
+                            const resJs = jsFib(value)
+
+                            const endJs = window.performance.now();
+                            log("end Fibo JS");
+                            const resultJs = (resJs + " (in " + (endJs-startJs) + "ms)");
+                            document.getElementById('result-js').innerHTML = resultJs;
+                            document.getElementById('js-indicator').classList.toggle('running');
+                            document.getElementById('result-js').classList.toggle('running');
+                        }, 0);
+                    }, 0)
+                       
+                    
+                });
+            }
+        </script>
+    </body>
+</html>
